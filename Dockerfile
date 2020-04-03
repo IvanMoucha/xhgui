@@ -34,6 +34,7 @@ RUN composer install $COMPOSER_FLAGS --no-scripts --no-autoloader
 COPY --from=source /app/webroot ./webroot
 COPY --from=source /app/src ./src
 COPY --from=source /app/config ./config
+COPY --from=source /app/external ./external
 
 # second run to invoke (possible) scripts and create autoloader
 RUN composer install $COMPOSER_FLAGS --classmap-authoritative
