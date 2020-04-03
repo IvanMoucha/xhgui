@@ -15,20 +15,36 @@ if (!is_readable($file)) {
     throw new InvalidArgumentException($file.' isn\'t readable');
 }
 
-$fp = fopen($file, 'r');
-if (!$fp) {
-    throw new RuntimeException('Can\'t open '.$file);
-}
-
 $container = Xhgui_ServiceContainer::instance();
 $saver = $container['saver.mongo'];
 
+$file_get_contents = file_get_contents($file, true);
+$data['profile'] = unserialize($file_get_contents);
 
-while (!feof($fp)) {
-    $line = fgets($fp);
-    $data = json_decode($line, true);
-    if ($data) {
-        $saver->save($data);
+/**
+ * Encodes a profile to avoid mongodb key errors.
+ * @param array $profile
+ *
+ * @return array
+ */
+function encodeProfile($profile)
+{
+    if (!is_array($profile)) {
+        return $profile;
     }
+    $target = array(
+        '__encoded' => true,
+    );
+    foreach ($profile as $k => $v) {
+        if (is_array($v)) {
+            $v = encodeProfile($v);
+        }
+        $replacementKey = strtr($k, array(
+            '.' => '．',
+        ));
+        $target[$replacementKey] = $v;
+    }
+    return $target;
 }
-fclose($fp);
+
+$saver->save(encodeProfile($data));
