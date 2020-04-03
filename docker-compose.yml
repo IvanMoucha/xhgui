@@ -6,6 +6,7 @@ services:
     volumes:
       - webroot-share:/var/www/xhgui/webroot
       - ./config:/var/www/xhgui/config
+      - ./:/mnt  
     environment:
       - XHGUI_MONGO_HOST=mongodb://mongo:27017
       - XHGUI_MONGO_DATABASE=xhprof
